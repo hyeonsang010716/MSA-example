@@ -16,6 +16,9 @@ spring:
               filters:
                 - StripPrefix=2
 
+jwt:
+  secret: hyeonsang-jwt-security
+
 eureka:
   client:
     register-with-eureka: true
