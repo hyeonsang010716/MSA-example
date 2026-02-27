@@ -4,6 +4,7 @@ import com.auth0.jwt.exceptions.JWTVerificationException;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.service_gateway.jwt.JwtUtil;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
@@ -17,6 +18,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
+@Slf4j
 @Component
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
@@ -31,12 +33,15 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
         String path = exchange.getRequest().getURI().getPath();
+        String method = exchange.getRequest().getMethod().name();
 
         if (PUBLIC_PATHS.contains(path)) {
+            log.info("[PUBLIC] {} {}", method, path);
             return chain.filter(exchange);
         }
 
         if (path.equals("/api/service-user/logout")) {
+            log.info("[LOGOUT] {} {}", method, path);
             exchange.getResponse().addCookie(
                     ResponseCookie.from("accessToken")
                             .path("/")
@@ -48,6 +53,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
         String token = resolveToken(exchange.getRequest());
         if (token == null) {
+            log.warn("[AUTH FAIL] {} {} - 토큰 없음", method, path);
             return unauthorized(exchange);
         }
 
@@ -56,8 +62,11 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
             String userId = jwt.getClaim("user_id").asString();
 
             if (userId == null) {
+                log.warn("[AUTH FAIL] {} {} - user_id 클레임 없음", method, path);
                 return unauthorized(exchange);
             }
+
+            log.info("[AUTH OK] {} {} - userId={}", method, path, userId);
 
             ServerHttpRequest mutatedRequest = exchange.getRequest().mutate()
                     .header("X-User-Id", userId)
@@ -65,6 +74,7 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
 
             return chain.filter(exchange.mutate().request(mutatedRequest).build());
         } catch (JWTVerificationException e) {
+            log.warn("[AUTH FAIL] {} {} - {}", method, path, e.getMessage());
             return unauthorized(exchange);
         }
     }
