@@ -1,3 +1,26 @@
+server:
+  port: 8080
+
 spring:
   application:
     name: service-gateway
+  cloud:
+    gateway:
+      server:
+        webflux:
+          routes:
+            - id: service-user
+              uri: lb://SERVICE-USER
+              predicates:
+                - Path=/api/service-user/**
+              filters:
+                - StripPrefix=2
+
+eureka:
+  client:
+    register-with-eureka: true
+    fetch-registry: true
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+  instance:
+    prefer-ip-address: true
