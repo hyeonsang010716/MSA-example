@@ -31,4 +31,15 @@ public class Item {
         this.price = price;
         this.quantity = quantity;
     }
+
+    public void decreaseQuantity() {
+        if (this.quantity <= 0) {
+            throw new IllegalArgumentException("재고가 부족합니다.");
+        }
+        this.quantity--;
+    }
+
+    public void increaseQuantity() {
+        this.quantity++;
+    }
 }

@@ -33,4 +33,18 @@ public class ItemService {
                 .map(ItemResponse::from)
                 .toList();
     }
+
+    @Transactional
+    public void buy(Long itemId) {
+        Item item = itemRepository.findByIdForUpdate(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이템입니다."));
+        item.decreaseQuantity();
+    }
+
+    @Transactional
+    public void cancel(Long itemId) {
+        Item item = itemRepository.findByIdForUpdate(itemId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 아이템입니다."));
+        item.increaseQuantity();
+    }
 }
