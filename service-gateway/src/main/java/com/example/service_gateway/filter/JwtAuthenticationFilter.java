@@ -8,7 +8,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;
 import org.springframework.core.Ordered;
-import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpCookie;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.server.reactive.ServerHttpRequest;
@@ -80,11 +80,8 @@ public class JwtAuthenticationFilter implements GlobalFilter, Ordered {
     }
 
     private String resolveToken(ServerHttpRequest request) {
-        String bearer = request.getHeaders().getFirst(HttpHeaders.AUTHORIZATION);
-        if (bearer != null && bearer.startsWith("Bearer ")) {
-            return bearer.substring(7);
-        }
-        return null;
+        HttpCookie cookie = request.getCookies().getFirst("accessToken");
+        return cookie != null ? cookie.getValue() : null;
     }
 
     private Mono<Void> unauthorized(ServerWebExchange exchange) {
