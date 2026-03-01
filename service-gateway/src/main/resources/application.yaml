@@ -15,6 +15,12 @@ spring:
                 - Path=/api/service-user/**
               filters:
                 - StripPrefix=2
+            - id: service-item
+              uri: lb://SERVICE-ITEM
+              predicates:
+                - Path=/api/service-item/**
+              filters:
+                - StripPrefix=2
 
 jwt:
   secret: hyeonsang-jwt-security
