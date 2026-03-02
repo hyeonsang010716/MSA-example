@@ -17,6 +17,30 @@ spring:
     hibernate:
       ddl-auto: create
     show-sql: true
+  kafka:
+    bootstrap-servers: localhost:9092
+    producer:
+      key-serializer: org.apache.kafka.common.serialization.StringSerializer
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+      properties:
+        spring.json.type.mapping: >
+          StockDecreasedEvent:com.example.service_item.event.StockDecreasedEvent,
+          StockDecreaseFailedEvent:com.example.service_item.event.StockDecreaseFailedEvent,
+          StockIncreasedEvent:com.example.service_item.event.StockIncreasedEvent,
+          OrderProcessingFailedEvent:com.example.service_item.event.OrderProcessingFailedEvent,
+          CancelProcessingFailedEvent:com.example.service_item.event.CancelProcessingFailedEvent
+    consumer:
+      group-id: item-service-group
+      auto-offset-reset: earliest
+      key-deserializer: org.apache.kafka.common.serialization.StringDeserializer
+      value-deserializer: org.springframework.kafka.support.serializer.JsonDeserializer
+      properties:
+        spring.json.trusted.packages: "*"
+        spring.json.type.mapping: >
+          OrderCreatedEvent:com.example.service_item.event.OrderCreatedEvent,
+          OrderCancelledEvent:com.example.service_item.event.OrderCancelledEvent,
+          CompensateStockDecreaseEvent:com.example.service_item.event.CompensateStockDecreaseEvent,
+          OrderStatusUpdateFailedEvent:com.example.service_item.event.OrderStatusUpdateFailedEvent
 
 eureka:
   client:
