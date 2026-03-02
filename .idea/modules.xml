@@ -2,7 +2,10 @@
 <project version="4">
   <component name="ProjectModuleManager">
     <modules>
-      <module fileurl="file://$PROJECT_DIR$/.idea/MSA-example.iml" filepath="$PROJECT_DIR$/.idea/MSA-example.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/service-gateway/MSA-example.service-gateway.main.iml" filepath="$PROJECT_DIR$/.idea/modules/service-gateway/MSA-example.service-gateway.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/service-item/MSA-example.service-item.main.iml" filepath="$PROJECT_DIR$/.idea/modules/service-item/MSA-example.service-item.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/service-order/MSA-example.service-order.main.iml" filepath="$PROJECT_DIR$/.idea/modules/service-order/MSA-example.service-order.main.iml" />
+      <module fileurl="file://$PROJECT_DIR$/.idea/modules/service-user/MSA-example.service-user.main.iml" filepath="$PROJECT_DIR$/.idea/modules/service-user/MSA-example.service-user.main.iml" />
     </modules>
   </component>
 </project>
