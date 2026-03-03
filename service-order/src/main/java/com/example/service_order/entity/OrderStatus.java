@@ -1,5 +1,8 @@
 package com.example.service_order.entity;
 
+import io.swagger.v3.oas.annotations.media.Schema;
+
+@Schema(description = "주문 상태", enumAsRef = true)
 public enum OrderStatus {
     PENDING("주문이 접수되었습니다. 처리 중입니다."),
     COMPLETED("주문이 완료되었습니다."),
