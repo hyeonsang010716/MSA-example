@@ -19,6 +19,10 @@ spring:
     show-sql: true
   kafka:
     bootstrap-servers: localhost:9092
+    listener:
+      observation-enabled: true
+    template:
+      observation-enabled: true
     producer:
       key-serializer: org.apache.kafka.common.serialization.StringSerializer
       value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
@@ -41,6 +45,25 @@ spring:
           OrderCancelledEvent:com.example.service_item.event.OrderCancelledEvent,
           CompensateStockDecreaseEvent:com.example.service_item.event.CompensateStockDecreaseEvent,
           OrderStatusUpdateFailedEvent:com.example.service_item.event.OrderStatusUpdateFailedEvent
+
+management:
+  tracing:
+    sampling:
+      probability: 1.0
+    propagation:
+      consume: B3
+      produce: B3
+  zipkin:
+    tracing:
+      endpoint: http://localhost:9411/api/v2/spans
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus
+
+logging:
+  pattern:
+    level: '%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]'
 
 eureka:
   client:
