@@ -3,6 +3,7 @@
 Spring Boot + Python 기반 마이크로서비스 아키텍처 예제 프로젝트입니다.
 주문과 재고 관리를 **Kafka 이벤트 기반 Saga 패턴**으로 구현하고, 장애 시 **보상 트랜잭션**으로 데이터 정합성을 보장합니다.
 **LangGraph 기반 AI 서비스**를 Python(FastAPI)으로 구현하여 Eureka에 등록하고 Gateway를 통해 통합합니다.
+**Zipkin 분산 트레이싱**으로 Gateway부터 개별 서비스, Kafka 이벤트까지 하나의 traceId로 추적합니다.
 
 ## 아키텍처
 
@@ -19,6 +20,8 @@ Spring Boot + Python 기반 마이크로서비스 아키텍처 예제 프로젝�
 | **service-order** | 8083 | 주문 생성/취소, 상태 관리 | H2 |
 | **service-ai** | 8084 | LangGraph RAG 채팅, 스트리밍, Handoffs | PostgreSQL |
 | **kafka** | 9092 | 메시지 브로커 | - |
+| **zipkin** | 9411 | 분산 트레이싱 UI / 수집 서버 | MySQL |
+| **mysql** | 3306 | Zipkin 트레이스 데이터 영구 저장 | - |
 
 ## 주문 흐름 (Saga Pattern)
 
@@ -108,6 +111,40 @@ OrderCancelledEvent → ItemService DB 에러 → 3회 재시도 실패
 | **보상 트랜잭션** | retry 소진 시 보상 이벤트로 자동 롤백 |
 | **Reconciliation** | Scheduler가 장기 체류 주문을 주기적으로 재처리 |
 
+## 분산 트레이싱 (Distributed Tracing)
+
+모든 서비스에 Zipkin 분산 트레이싱이 적용되어 있습니다. Gateway에서 시작된 요청이 어떤 서비스를 거치고, Kafka를 통해 어떻게 전파되는지 **하나의 traceId**로 추적할 수 있습니다.
+
+### 구성 요소
+
+| 서비스 | 트레이싱 라이브러리 | 역할 |
+|--------|---------------------|------|
+| **Java 서비스** (Gateway, User, Item, Order) | Micrometer Tracing + Brave | span 생성, B3 헤더 전파, Zipkin 리포트 |
+| **Python 서비스** (AI) | OpenTelemetry + Zipkin Exporter | span 생성, B3 헤더 전파, Zipkin 리포트 |
+| **Zipkin** | - | span 수집, 저장, UI 시각화 |
+
+### 동작 방식
+
+```
+1. Gateway에서 요청 수신 → Brave가 traceId(groupID) 자동 생성
+2. 다운스트림 서비스 호출 시 B3 헤더로 traceId 전파
+3. Kafka 이벤트 발행/소비 시 Kafka 헤더로 traceId 전파
+4. 각 서비스가 span을 Zipkin 서버(http://localhost:9411)로 비동기 전송
+5. Zipkin UI에서 전체 트레이스 시각화
+```
+
+### Zipkin UI 확인
+
+```
+http://localhost:9411
+```
+
+Saga 흐름 예시: `POST /api/service-order/buy` 요청 시 Zipkin에서 다음 트레이스를 확인할 수 있습니다.
+
+```
+service-gateway → service-order → kafka(order-events) → service-item → kafka(item-events) → service-order
+```
+
 ## 인증 흐름
 
 ```
@@ -119,7 +156,7 @@ OrderCancelledEvent → ItemService DB 에러 → 3회 재시도 실패
 
 ## 실행 방법
 
-### 1. Kafka 실행
+### 1. 인프라 실행 (Kafka, Zipkin, MySQL)
 
 ```bash
 docker-compose up -d
@@ -184,5 +221,8 @@ curl -b cookies.txt -X POST "http://localhost:8080/api/service-ai/v1/chat" \
 - **Python 3.12**, **FastAPI** — AI 서비스
 - **LangGraph** + **LangChain** — RAG, Multi-Agent Handoffs
 - **py-eureka-client** — Python 서비스 Eureka 등록
+- **Micrometer Tracing** + **Brave** — Java 분산 트레이싱
+- **OpenTelemetry** — Python 분산 트레이싱
+- **Zipkin** — 트레이스 수집 / 시각화
 - **Gradle** / **uv** — 빌드 도구
-- **Docker Compose** — Kafka 인프라
+- **Docker Compose** — Kafka, Zipkin, MySQL 인프라
