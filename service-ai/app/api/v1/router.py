@@ -1,0 +1,83 @@
+from fastapi import APIRouter, Request
+
+from app.dto.chat_dto import ChatRequest, ChatResponse, DeleteMessagesRequest, CheckpointListResponse, PurgeCheckpointsRequest, ResumeRequest
+from app.core.graph.stream.stream_response import create_sse_response
+from app.service.chat_service import ChatService
+from app.service.stream_service import StreamService
+from app.service.handoffs_service import HandoffsService
+
+router = APIRouter(prefix="/v1", tags=["v1"])
+
+chat_service = ChatService()
+stream_service = StreamService()
+handoffs_service = HandoffsService()
+
+
+@router.post("/chat", response_model=ChatResponse)
+async def chat(request: ChatRequest):
+    """LangGraph 채팅 API"""
+    return await chat_service.chat(request)
+
+
+@router.post("/chat/stream")
+async def chat_stream(request: ChatRequest):
+    """LangGraph 채팅 SSE 스트리밍 API"""
+    return create_sse_response(stream_service.stream_chat(request))
+
+
+@router.post("/handoffs")
+async def handoffs_chat(request: ChatRequest):
+    """멀티 에이전트 Handoffs 채팅 API
+
+    interrupt 발생 시 status="interrupted"와 interrupt_info를 반환합니다.
+    이 경우 /handoffs/resume으로 재개해야 합니다.
+    """
+    return await handoffs_service.chat(
+        question=request.question,
+        session_id=request.session_id,
+    )
+
+
+@router.post("/handoffs/resume")
+async def handoffs_resume(request: ResumeRequest):
+    """Handoffs interrupt 재개 API
+
+    interrupt된 핸드오프를 사용자 응답(승인/거절)으로 재개합니다.
+    """
+    return await handoffs_service.resume(
+        session_id=request.session_id,
+        action=request.action,
+    )
+
+
+@router.post("/chat/resume", response_model=ChatResponse)
+async def resume(request: ResumeRequest):
+    """Human-in-the-loop 재개 API"""
+    return await chat_service.resume(request)
+
+
+@router.post("/print-all-info")
+async def info(request: Request):
+    """LangGraph Checkpoint 정보 조회 API"""
+    checkpointer = request.app.state.checkpointer
+    return await chat_service.info(checkpointer)
+
+
+@router.get("/checkpoint-info", response_model=CheckpointListResponse)
+async def checkpoint_info(request: Request, session_id: str):
+    """복원 가능한 체크포인트 목록 조회 API"""
+    checkpointer = request.app.state.checkpointer
+    return await chat_service.get_checkpoint_list(checkpointer, session_id)
+
+
+@router.delete("/chat/messages")
+async def delete_messages(request: DeleteMessagesRequest):
+    """메시지 삭제 API (message_ids 없으면 전체 삭제)"""
+    return await chat_service.delete_messages(request)
+
+
+@router.delete("/checkpoints/purge")
+async def purge_checkpoints(request: Request, data: PurgeCheckpointsRequest):
+    """체크포인트 물리 삭제 API (PostgreSQL에서 직접 삭제)"""
+    checkpointer = request.app.state.checkpointer
+    return await chat_service.purge_checkpoints(checkpointer, data)

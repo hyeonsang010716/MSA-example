@@ -27,6 +27,12 @@ spring:
                 - Path=/api/service-order/**
               filters:
                 - StripPrefix=2
+            - id: service-ai
+              uri: lb://SERVICE-AI
+              predicates:
+                - Path=/api/service-ai/**
+              filters:
+                - StripPrefix=2
 
 jwt:
   secret: hyeonsang-jwt-security
