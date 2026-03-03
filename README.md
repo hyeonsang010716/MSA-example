@@ -1,47 +1,12 @@
 # MSA-example
 
-Spring Boot 기반 마이크로서비스 아키텍처 예제 프로젝트입니다.
+Spring Boot + Python 기반 마이크로서비스 아키텍처 예제 프로젝트입니다.
 주문과 재고 관리를 **Kafka 이벤트 기반 Saga 패턴**으로 구현하고, 장애 시 **보상 트랜잭션**으로 데이터 정합성을 보장합니다.
+**LangGraph 기반 AI 서비스**를 Python(FastAPI)으로 구현하여 Eureka에 등록하고 Gateway를 통해 통합합니다.
 
 ## 아키텍처
 
-```
-                          ┌──────────────────────┐
-                          │   Service Discovery   │
-                          │    (Eureka :8761)     │
-                          └──────────┬───────────┘
-                                     │ 서비스 등록/탐색
-           ┌─────────────────────────┼─────────────────────────┐
-           │                         │                         │
-┌──────────▼──────────┐   ┌─────────▼─────────┐   ┌──────────▼──────────┐
-│   Service User      │   │   Service Item    │   │   Service Order     │
-│     (:8081)         │   │     (:8082)       │   │     (:8083)         │
-│                     │   │                   │   │                     │
-│  - 회원가입/로그인      │   │  - 상품 등록/조회    │   │  - 주문 생성/취소       │
-│  - JWT 발급          │   │  - 재고 차감/복구    │   │  - 주문 상태 관리       │
-│                     │   │  - 보상 트랜잭션     │   │  - Reconciliation    │
-└─────────────────────┘   └────────┬──────────┘   └──────────┬──────────┘
-                                   │                         │
-                                   │    ┌───────────┐        │
-                                   ├───►│   Kafka   │◄───────┤
-                                   │    │  (:9092)  │        │
-                                   │◄───┤           ├───────►│
-                                   │    └───────────┘        │
-                                   │                         │
-                          order-events 토픽        item-events 토픽
-
-           ┌─────────────────────────────────────────────────────┐
-           │                  Service Gateway (:8080)            │
-           │          JWT 검증 → 라우팅 → 로드밸런싱                   │
-           │                                                     │
-           │  /api/service-user/**  → SERVICE-USER               │
-           │  /api/service-item/**  → SERVICE-ITEM               │
-           │  /api/service-order/** → SERVICE-ORDER              │
-           └─────────────────────────────────────────────────────┘
-                                     ▲
-                                     │ HTTP
-                                  Client
-```
+![MSA Architecture](docs/msa-architecture.png)
 
 ## 서비스 구성
 
@@ -52,6 +17,7 @@ Spring Boot 기반 마이크로서비스 아키텍처 예제 프로젝트입니�
 | **service-user** | 8081 | 회원가입, 로그인, JWT 발급 | H2 |
 | **service-item** | 8082 | 상품 등록/조회, 재고 관리 | H2 |
 | **service-order** | 8083 | 주문 생성/취소, 상태 관리 | H2 |
+| **service-ai** | 8084 | LangGraph RAG 채팅, 스트리밍, Handoffs | PostgreSQL |
 | **kafka** | 9092 | 메시지 브로커 | - |
 
 ## 주문 흐름 (Saga Pattern)
@@ -168,10 +134,11 @@ cd service-discovery && ./gradlew bootRun
 # 2) Gateway
 cd service-gateway && ./gradlew bootRun
 
-# 3) User / Item / Order (순서 무관)
+# 3) User / Item / Order / AI (순서 무관)
 cd service-user && ./gradlew bootRun
 cd service-item && ./gradlew bootRun
 cd service-order && ./gradlew bootRun
+cd service-ai && uv run uvicorn app.main:app --host 0.0.0.0 --port 8084
 ```
 
 ### 3. API 테스트
@@ -200,6 +167,11 @@ curl -b cookies.txt "http://localhost:8080/api/service-order/search"
 
 # 주문 취소
 curl -b cookies.txt -X POST "http://localhost:8080/api/service-order/cancel?order_id=1"
+
+# AI 채팅
+curl -b cookies.txt -X POST "http://localhost:8080/api/service-ai/v1/chat" \
+  -H "Content-Type: application/json" \
+  -d '{"message": "안녕하세요"}'
 ```
 
 ## 기술 스택
@@ -209,5 +181,8 @@ curl -b cookies.txt -X POST "http://localhost:8080/api/service-order/cancel?orde
 - **Apache Kafka** — 이벤트 기반 비동기 통신
 - **Spring Data JPA** + **H2** — 데이터 접근
 - **Auth0 java-jwt** — JWT 인증
-- **Gradle** — 빌드 도구
+- **Python 3.12**, **FastAPI** — AI 서비스
+- **LangGraph** + **LangChain** — RAG, Multi-Agent Handoffs
+- **py-eureka-client** — Python 서비스 Eureka 등록
+- **Gradle** / **uv** — 빌드 도구
 - **Docker Compose** — Kafka 인프라
