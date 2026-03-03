@@ -34,6 +34,10 @@ dependencies = [
     "sqlalchemy[asyncio]==2.0.43",
     "strawberry-graphql[fastapi]>=0.291.3",
     "py-eureka-client>=0.11.0",
+    "opentelemetry-sdk",
+    "opentelemetry-exporter-zipkin-json",
+    "opentelemetry-instrumentation-fastapi",
+    "opentelemetry-propagator-b3",
 ]
 
 [tool.pytest.ini_options]

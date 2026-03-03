@@ -10,6 +10,8 @@ import py_eureka_client.eureka_client as eureka_client
 
 
 from app.config.setting import settings
+from app.config.tracing import setup_tracing
+from app.config.middleware import GroupIdLoggingMiddleware
 from app.core.llm_manager import get_llm_manager
 from app.core.graph.example.graph_orchestrator import get_example_graph
 from app.core.graph.stream.stream_graph import get_stream_graph
@@ -96,9 +98,13 @@ def create_app() -> FastAPI:
         allow_headers=["*"],
     )
     
+    app.add_middleware(GroupIdLoggingMiddleware)
+
     app.include_router(health_router)
     app.include_router(v1_router)
     app.include_router(graphql_router, prefix="/graphql")
+
+    setup_tracing(app, settings.EUREKA_APP_NAME, settings.ZIPKIN_ENDPOINT)
 
     return app
 

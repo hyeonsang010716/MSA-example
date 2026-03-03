@@ -20,6 +20,9 @@ class Settings(BaseSettings):
     POSTGRES_PASSWORD: str = Field("hyeonsang", description="POSTGRES PASSWORD")
     POSTGRES_NAME: str = Field("chohyeonsang", description="POSTGRES NAME")
     
+    # Zipkin
+    ZIPKIN_ENDPOINT: str = Field("http://localhost:9411/api/v2/spans", description="Zipkin 엔드포인트")
+
     # Eureka 설정
     EUREKA_SERVER: str = Field("http://localhost:8761/eureka/", description="Eureka 서버 URL")
     EUREKA_APP_NAME: str = Field("service-ai", description="Eureka 등록 애플리케이션 이름")
