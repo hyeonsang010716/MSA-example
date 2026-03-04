@@ -23,10 +23,8 @@ class Settings(BaseSettings):
     # Zipkin
     ZIPKIN_ENDPOINT: str = Field("http://localhost:9411/api/v2/spans", description="Zipkin 엔드포인트")
 
-    # Eureka 설정
-    EUREKA_SERVER: str = Field("http://localhost:8761/eureka/", description="Eureka 서버 URL")
-    EUREKA_APP_NAME: str = Field("service-ai", description="Eureka 등록 애플리케이션 이름")
-    EUREKA_INSTANCE_HOST: str = Field("localhost", description="Eureka 인스턴스 호스트")
+    # Application
+    APP_NAME: str = Field("service-ai", description="애플리케이션 이름")
 
     # Langsmith
     LANGCHAIN_TRACING_V2: Optional[bool] = None

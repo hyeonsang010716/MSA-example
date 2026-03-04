@@ -1,7 +1,5 @@
 rootProject.name = 'MSA-example'
 
-include 'service-discovery'
-include 'service-gateway'
 include 'service-user'
 include 'service-item'
 include 'service-order'

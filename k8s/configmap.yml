@@ -1,0 +1,104 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-user-config
+  namespace: default
+data:
+  SERVER_PORT: "8081"
+  SPRING_APPLICATION_NAME: "service-user"
+  SPRING_DATASOURCE_URL: "jdbc:h2:mem:userdb"
+  SPRING_DATASOURCE_DRIVER_CLASS_NAME: "org.h2.Driver"
+  SPRING_DATASOURCE_USERNAME: "sa"
+  SPRING_DATASOURCE_PASSWORD: ""
+  SPRING_H2_CONSOLE_ENABLED: "true"
+  SPRING_H2_CONSOLE_PATH: "/h2-console"
+  SPRING_JPA_HIBERNATE_DDL_AUTO: "create"
+  SPRING_JPA_SHOW_SQL: "true"
+  MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+  MANAGEMENT_TRACING_PROPAGATION_CONSUME: "B3"
+  MANAGEMENT_TRACING_PROPAGATION_PRODUCE: "B3"
+  MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "http://192.168.56.30:9411/api/v2/spans"
+  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,prometheus"
+  LOGGING_PATTERN_LEVEL: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+  JWT_SECRET: "hyeonsang-jwt-security"
+  JWT_EXPIRATION: "604800000"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-item-config
+  namespace: default
+data:
+  SERVER_PORT: "8082"
+  SPRING_APPLICATION_NAME: "service-item"
+  SPRING_DATASOURCE_URL: "jdbc:h2:mem:itemdb"
+  SPRING_DATASOURCE_DRIVER_CLASS_NAME: "org.h2.Driver"
+  SPRING_DATASOURCE_USERNAME: "sa"
+  SPRING_DATASOURCE_PASSWORD: ""
+  SPRING_H2_CONSOLE_ENABLED: "true"
+  SPRING_H2_CONSOLE_PATH: "/h2-console"
+  SPRING_JPA_HIBERNATE_DDL_AUTO: "create"
+  SPRING_JPA_SHOW_SQL: "true"
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: "192.168.56.30:9092"
+  SPRING_KAFKA_LISTENER_OBSERVATION_ENABLED: "true"
+  SPRING_KAFKA_TEMPLATE_OBSERVATION_ENABLED: "true"
+  SPRING_KAFKA_PRODUCER_KEY_SERIALIZER: "org.apache.kafka.common.serialization.StringSerializer"
+  SPRING_KAFKA_PRODUCER_VALUE_SERIALIZER: "org.springframework.kafka.support.serializer.JsonSerializer"
+  SPRING_KAFKA_CONSUMER_GROUP_ID: "item-service-group"
+  SPRING_KAFKA_CONSUMER_AUTO_OFFSET_RESET: "earliest"
+  SPRING_KAFKA_CONSUMER_KEY_DESERIALIZER: "org.apache.kafka.common.serialization.StringDeserializer"
+  SPRING_KAFKA_CONSUMER_VALUE_DESERIALIZER: "org.springframework.kafka.support.serializer.JsonDeserializer"
+  MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+  MANAGEMENT_TRACING_PROPAGATION_CONSUME: "B3"
+  MANAGEMENT_TRACING_PROPAGATION_PRODUCE: "B3"
+  MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "http://192.168.56.30:9411/api/v2/spans"
+  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,prometheus"
+  LOGGING_PATTERN_LEVEL: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-order-config
+  namespace: default
+data:
+  SERVER_PORT: "8083"
+  SPRING_APPLICATION_NAME: "service-order"
+  SPRING_DATASOURCE_URL: "jdbc:h2:mem:orderdb"
+  SPRING_DATASOURCE_DRIVER_CLASS_NAME: "org.h2.Driver"
+  SPRING_DATASOURCE_USERNAME: "sa"
+  SPRING_DATASOURCE_PASSWORD: ""
+  SPRING_H2_CONSOLE_ENABLED: "true"
+  SPRING_H2_CONSOLE_PATH: "/h2-console"
+  SPRING_JPA_HIBERNATE_DDL_AUTO: "create"
+  SPRING_JPA_SHOW_SQL: "true"
+  SPRING_KAFKA_BOOTSTRAP_SERVERS: "192.168.56.30:9092"
+  SPRING_KAFKA_LISTENER_OBSERVATION_ENABLED: "true"
+  SPRING_KAFKA_TEMPLATE_OBSERVATION_ENABLED: "true"
+  SPRING_KAFKA_PRODUCER_KEY_SERIALIZER: "org.apache.kafka.common.serialization.StringSerializer"
+  SPRING_KAFKA_PRODUCER_VALUE_SERIALIZER: "org.springframework.kafka.support.serializer.JsonSerializer"
+  SPRING_KAFKA_CONSUMER_GROUP_ID: "order-service-group"
+  SPRING_KAFKA_CONSUMER_AUTO_OFFSET_RESET: "earliest"
+  SPRING_KAFKA_CONSUMER_KEY_DESERIALIZER: "org.apache.kafka.common.serialization.StringDeserializer"
+  SPRING_KAFKA_CONSUMER_VALUE_DESERIALIZER: "org.springframework.kafka.support.serializer.JsonDeserializer"
+  MANAGEMENT_TRACING_SAMPLING_PROBABILITY: "1.0"
+  MANAGEMENT_TRACING_PROPAGATION_CONSUME: "B3"
+  MANAGEMENT_TRACING_PROPAGATION_PRODUCE: "B3"
+  MANAGEMENT_ZIPKIN_TRACING_ENDPOINT: "http://192.168.56.30:9411/api/v2/spans"
+  MANAGEMENT_ENDPOINTS_WEB_EXPOSURE_INCLUDE: "health,info,prometheus"
+  LOGGING_PATTERN_LEVEL: "%5p [${spring.application.name:},%X{traceId:-},%X{spanId:-}]"
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: service-ai-config
+  namespace: default
+data:
+  HOST: "0.0.0.0"
+  PORT: "8084"
+  APP_NAME: "service-ai"
+  ZIPKIN_ENDPOINT: "http://192.168.56.30:9411/api/v2/spans"
+  POSTGRES_HOST: "hyeonsang-postgres"
+  POSTGRES_PORT: "5432"
+  POSTGRES_USER: "cho"
+  POSTGRES_PASSWORD: "hyeonsang"
+  POSTGRES_NAME: "chohyeonsang"

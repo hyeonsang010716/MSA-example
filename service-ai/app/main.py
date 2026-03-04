@@ -6,7 +6,6 @@ from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 from contextlib import asynccontextmanager
 import uvicorn
-import py_eureka_client.eureka_client as eureka_client
 
 
 from app.config.setting import settings
@@ -27,19 +26,6 @@ async def lifespan(app: FastAPI):
     
     # LLM 초기화
     get_llm_manager()
-
-    # Eureka 등록
-    await eureka_client.init_async(
-        eureka_server=settings.EUREKA_SERVER,
-        app_name=settings.EUREKA_APP_NAME,
-        instance_port=settings.PORT,
-        instance_host=settings.EUREKA_INSTANCE_HOST,
-        health_check_url=f"http://{settings.EUREKA_INSTANCE_HOST}:{settings.PORT}/actuator/health",
-        home_page_url=f"http://{settings.EUREKA_INSTANCE_HOST}:{settings.PORT}/",
-        status_page_url=f"http://{settings.EUREKA_INSTANCE_HOST}:{settings.PORT}/docs",
-        renewal_interval_in_secs=30,
-        duration_in_secs=90,
-    )
 
     async with (
         AsyncPostgresStore.from_conn_string(
@@ -73,9 +59,6 @@ async def lifespan(app: FastAPI):
 
         yield
 
-    # Eureka 해제
-    await eureka_client.stop_async()
-
 
 def create_app() -> FastAPI:
     """FastAPI 애플리케이션 팩토리"""
@@ -104,7 +87,7 @@ def create_app() -> FastAPI:
     app.include_router(v1_router)
     app.include_router(graphql_router, prefix="/graphql")
 
-    setup_tracing(app, settings.EUREKA_APP_NAME, settings.ZIPKIN_ENDPOINT)
+    setup_tracing(app, settings.APP_NAME, settings.ZIPKIN_ENDPOINT)
 
     return app
 
