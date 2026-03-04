@@ -1,7 +1,6 @@
 services:
   kafka:
     image: apache/kafka:3.7.0
-    platform: linux/amd64
     container_name: kafka
     ports:
       - "9092:9092"
@@ -18,8 +17,7 @@ services:
       KAFKA_TRANSACTION_STATE_LOG_MIN_ISR: 1
 
   mysql:
-    image: mysql:5.7
-    platform: linux/amd64
+    image: mysql:8.0
     container_name: mysql
     volumes:
       - ./initdb.d:/docker-entrypoint-initdb.d
