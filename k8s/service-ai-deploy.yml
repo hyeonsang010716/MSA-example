@@ -13,6 +13,8 @@ spec:
       labels:
         app: service-ai
     spec:
+      imagePullSecrets:
+        - name: dockerhub-secret
       containers:
         - name: service-ai
           image: hyeonsang/msa-service-ai:latest
