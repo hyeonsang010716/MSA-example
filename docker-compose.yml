@@ -61,3 +61,6 @@ services:
       - MYSQL_HOST=mysql
     depends_on:
       - mysql
+
+volumes:
+  postgresql-data:
