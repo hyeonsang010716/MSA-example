@@ -97,7 +97,7 @@ data:
   PORT: "8084"
   APP_NAME: "service-ai"
   ZIPKIN_ENDPOINT: "http://192.168.56.30:9411/api/v2/spans"
-  POSTGRES_HOST: "hyeonsang-postgres"
+  POSTGRES_HOST: "192.168.56.30"
   POSTGRES_PORT: "5432"
   POSTGRES_USER: "cho"
   POSTGRES_PASSWORD: "hyeonsang"
